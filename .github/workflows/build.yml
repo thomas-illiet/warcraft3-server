@@ -299,6 +299,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           options=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then options+=(--prerelease); fi
