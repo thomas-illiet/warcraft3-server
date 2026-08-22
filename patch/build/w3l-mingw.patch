@@ -1,0 +1,248 @@
+diff --git a/exe/nodefaultlib.h b/exe/nodefaultlib.h
+--- a/exe/nodefaultlib.h
++++ b/exe/nodefaultlib.h
+@@ -2,7 +2,7 @@
+ #pragma comment(linker, "/entry:WinMain")
+ #include <windows.h>
+ #include <stdio.h>
+-#include <Winternl.h>
++#include <winternl.h>
+ #include <winnt.h>
+ #pragma intrinsic(strlen)
+ #pragma function(memset, memcmp)
+diff --git a/dll/nodefaultlib.h b/dll/nodefaultlib.h
+--- a/dll/nodefaultlib.h
++++ b/dll/nodefaultlib.h
+@@ -2,7 +2,7 @@
+ #pragma comment(linker, "/entry:DllMain")
+ #include <windows.h>
+ #include <stdio.h>
+-#include <Winternl.h>
++#include <winternl.h>
+ #include <winnt.h>
+-#include <Shlwapi.h>
++#include <shlwapi.h>
+ #pragma intrinsic(strlen)
+diff --git a/dll_27a/nodefaultlib.h b/dll_27a/nodefaultlib.h
+--- a/dll_27a/nodefaultlib.h
++++ b/dll_27a/nodefaultlib.h
+@@ -2,7 +2,7 @@
+ #pragma comment(linker, "/entry:DllMain")
+ #include <windows.h>
+ #include <stdio.h>
+-#include <Winternl.h>
++#include <winternl.h>
+ #include <winnt.h>
+-#include <Shlwapi.h>
++#include <shlwapi.h>
+ #pragma intrinsic(strlen)
+diff --git a/dll/w3lh.c b/dll/w3lh.c
+--- a/dll/w3lh.c
++++ b/dll/w3lh.c
+@@ -47,7 +47,7 @@
+ 
+ #define DEFAULT_LATENCY 0x64
+ 
+-#define GAME_DLL_LOAD_ERROR "Could not open " ## GAME_DLL_NAME
+-#define GAME_MAIN_ERROR "Could not locate procedure " ## GAME_MAIN
++#define GAME_DLL_LOAD_ERROR "Could not open " GAME_DLL_NAME
++#define GAME_MAIN_ERROR "Could not locate procedure " GAME_MAIN
+ #define SIG_NOT_FOUND_ERROR "Could not find location to patch."
+ #define MEMORY_WRITE_ERROR "Could not write to process memory."
+@@ -63,12 +63,12 @@
+ 	HFILE file;
+ 	OFSTRUCT ofFile;
+ 	char buf[4];
+-	int lt, readNum;
++	int lt;
+ 	file = OpenFile(LATENCY_FILE, &ofFile, OF_READ);
+ 	if (file == HFILE_ERROR)
+ 		return DEFAULT_LATENCY;
+-	ReadFile(file, buf, 3, &readNum, NULL);
+-	CloseHandle(file);
++	_lread(file, buf, 3);
++	_lclose(file);
+ 	buf[3] = '\0';
+ 	lt = StrToInt(buf);
+ 	if (lt > 255 || lt < 30)
+@@ -309,6 +309,6 @@
+    See __attribute__((naked)) for gcc (but not on x86).
+    */
+-DLLEXPORT __declspec( naked ) int GameMain(HMODULE hw3lhBase) {
++DLLEXPORT __declspec( naked ) int GameMain_original(HMODULE hw3lhBase) {
+ 	__asm {
+ 		mov eax, game_dll_base
+ 		push eax
+diff --git a/dll_27a/w3lh.c b/dll_27a/w3lh.c
+--- a/dll_27a/w3lh.c
++++ b/dll_27a/w3lh.c
+@@ -47,7 +47,7 @@
+ 
+ #define DEFAULT_LATENCY 0x64
+ 
+-#define GAME_DLL_LOAD_ERROR "Could not open " ## GAME_DLL_NAME
+-#define GAME_MAIN_ERROR "Could not locate procedure " ## GAME_MAIN
++#define GAME_DLL_LOAD_ERROR "Could not open " GAME_DLL_NAME
++#define GAME_MAIN_ERROR "Could not locate procedure " GAME_MAIN
+ #define SIG_NOT_FOUND_ERROR "Could not find location to patch."
+ #define MEMORY_WRITE_ERROR "Could not write to process memory."
+@@ -63,12 +63,12 @@
+     HFILE file;
+ 	OFSTRUCT ofFile;
+ 	char buf[4];
+-    int lt, readNum;
++    int lt;
+     file = OpenFile ( LATENCY_FILE, &ofFile, OF_READ);
+     if ( file == HFILE_ERROR )
+         return DEFAULT_LATENCY;
+-    ReadFile( file, buf, 3, &readNum, NULL );
+-    CloseHandle( file );
++    _lread( file, buf, 3 );
++    _lclose( file );
+ 	buf[3] = '\0';
+ 	lt = StrToInt( buf );
+     if ( lt > 255 || lt < 30)
+@@ -212,7 +212,7 @@
+ 	rel_call_addr = (int)w3l_lph_checked_rev - lph_checked_loc - 4 - (int)base;
+ 	debug("Setting LPH_checked call addr at 0x%08x to 0x%08x\r\n", lph_checked_loc + base, rel_call_addr);
+ 	addr_fix.length = 4;
+-	addr_fix.data = &(char *)rel_call_addr;
++	addr_fix.data = (char *)&rel_call_addr;
+ 	addr_fix.name = "LPH_checked call1 address";
+ 	if (apply_patch(base + lph_checked_loc, &addr_fix) == ERR_MEM_WRITE)
+ 		return ERR_MEM_WRITE;
+@@ -227,7 +227,7 @@
+ 	rel_call_addr = (int)w3l_lph_checked_rev - lph_checked_loc - 4 - (int)base;
+ 	debug("Setting LPH_checked call addr at 0x%08x to 0x%08x\r\n", lph_checked_loc + base, rel_call_addr);
+ 	addr_fix.length = 4;
+-	addr_fix.data = &(char *)rel_call_addr;
++	addr_fix.data = (char *)&rel_call_addr;
+ 	addr_fix.name = "LPH_checked call2 address";
+ 	if (apply_patch(base + lph_checked_loc, &addr_fix) == ERR_MEM_WRITE)
+ 		return ERR_MEM_WRITE;
+@@ -332,6 +332,6 @@
+    See __attribute__((naked)) for gcc (but not on x86).
+    */
+-DLLEXPORT __declspec( naked ) int GameMain(HMODULE hw3lhBase) {
++DLLEXPORT __declspec( naked ) int GameMain_original(HMODULE hw3lhBase) {
+ 	__asm {
+ 		mov eax, game_dll_base
+ 		push eax
+diff --git a/dll/dep.c b/dll/dep.c
+--- a/dll/dep.c
++++ b/dll/dep.c
+@@ -56,5 +56,5 @@
+ // Completely undocumented from Microsoft. You can find this information by  
+ // disassembling Vista's SP1 kernel32.dll with your favorite disassembler.  
+ enum PROCESS_INFORMATION_CLASS {  
+-  ProcessExecuteFlags = 0x22,  
++  W3LProcessExecuteFlags = 0x22,  
+ };  
+@@ -81,4 +81,4 @@
+   FnSetProcessDEPPolicy SetProcDEP =  
+       reinterpret_cast<FnSetProcessDEPPolicy>(  
+-          GetProcAddress(GetModuleHandle(L"kernel32.dll"),  
++          GetProcAddress(GetModuleHandleW(L"kernel32.dll"),  
+                                          "SetProcessDEPPolicy"));  
+@@ -109,4 +109,4 @@
+   FnNtSetInformationProcess NtSetInformationProc =  
+       reinterpret_cast<FnNtSetInformationProcess>(  
+-          GetProcAddress(GetModuleHandle(L"ntdll.dll"),  
++          GetProcAddress(GetModuleHandleW(L"ntdll.dll"),  
+                                          "NtSetInformationProcess"));  
+@@ -139,6 +139,6 @@
+   debug ( "NtSetInformationProc used\r\n");
+   
+   HRESULT status = NtSetInformationProc(GetCurrentProcess(),  
+-                                        ProcessExecuteFlags,  
++                                        W3LProcessExecuteFlags,  
+                                         &dep_flags,  
+                                         sizeof(dep_flags));  
+diff --git a/dll/dep.c b/dll/dep.c
+--- a/dll/dep.c
++++ b/dll/dep.c
+@@ -17,6 +17,6 @@
+ 
+ */
+-#define DEBUG_FILE L"debug.log"
++#define DEBUG_FILE "debug.log"
+ #include "dep.h"
+ #include <windows.h>
+ #include <stdio.h>
+@@ -32,6 +32,6 @@
+ 	wvsprintfA(buf, message, args);
+ 
+-	file = CreateFile((LPCWSTR)DEBUG_FILE, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
++	file = CreateFileA(DEBUG_FILE, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+ 	SetFilePointer(file, 0, 0, FILE_END);
+ 	WriteFile(file, buf, (DWORD)strlen(buf), &temp, NULL);
+ 	CloseHandle(file);
+diff --git a/dll_27a/dep.c b/dll_27a/dep.c
+--- a/dll_27a/dep.c
++++ b/dll_27a/dep.c
+@@ -17,6 +17,6 @@
+ 
+ */
+-#define DEBUG_FILE L"debug.log"
++#define DEBUG_FILE "debug.log"
+ #include "dep.h"
+ #include <windows.h>
+ #include <stdio.h>
+@@ -32,6 +32,6 @@
+ 	wvsprintfA(buf, message, args);
+ 
+-	file = CreateFile((LPCWSTR)DEBUG_FILE, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
++	file = CreateFileA(DEBUG_FILE, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+ 	SetFilePointer(file, 0, 0, FILE_END);
+ 	WriteFile(file, buf, (DWORD)strlen(buf), &temp, NULL);
+ 	CloseHandle(file);
+diff --git a/dll/nodefaultlib.c b/dll/nodefaultlib.c
+--- a/dll/nodefaultlib.c
++++ b/dll/nodefaultlib.c
+@@ -1,5 +1,5 @@
+ #include "nodefaultlib.h"
+-#define DEBUG_FILE L"debug.log"
++#define DEBUG_FILE "debug.log"
+ 
+ void * __cdecl memset(void *pTarget, int value, size_t cbTarget)
+ {
+diff --git a/dll_27a/nodefaultlib.c b/dll_27a/nodefaultlib.c
+--- a/dll_27a/nodefaultlib.c
++++ b/dll_27a/nodefaultlib.c
+@@ -1,5 +1,5 @@
+ #include "nodefaultlib.h"
+-#define DEBUG_FILE L"debug.log"
++#define DEBUG_FILE "debug.log"
+ 
+ void * __cdecl memset(void *pTarget, int value, size_t cbTarget)
+ {
+diff --git a/dll_27a/dep.c b/dll_27a/dep.c
+--- a/dll_27a/dep.c
++++ b/dll_27a/dep.c
+@@ -56,5 +56,5 @@
+ // Completely undocumented from Microsoft. You can find this information by  
+ // disassembling Vista's SP1 kernel32.dll with your favorite disassembler.  
+ enum PROCESS_INFORMATION_CLASS {  
+-  ProcessExecuteFlags = 0x22,  
++  W3LProcessExecuteFlags = 0x22,  
+ };  
+@@ -81,4 +81,4 @@
+   FnSetProcessDEPPolicy SetProcDEP =  
+       reinterpret_cast<FnSetProcessDEPPolicy>(  
+-          GetProcAddress(GetModuleHandle(L"kernel32.dll"),  
++          GetProcAddress(GetModuleHandleW(L"kernel32.dll"),  
+                                          "SetProcessDEPPolicy"));  
+@@ -109,4 +109,4 @@
+   FnNtSetInformationProcess NtSetInformationProc =  
+       reinterpret_cast<FnNtSetInformationProcess>(  
+-          GetProcAddress(GetModuleHandle(L"ntdll.dll"),  
++          GetProcAddress(GetModuleHandleW(L"ntdll.dll"),  
+                                          "NtSetInformationProcess"));  
+@@ -139,6 +139,6 @@
+   debug ( "NtSetInformationProc used\r\n");
+   
+   HRESULT status = NtSetInformationProc(GetCurrentProcess(),  
+-                                        ProcessExecuteFlags,  
++                                        W3LProcessExecuteFlags,  
+                                         &dep_flags,  
+                                         sizeof(dep_flags));  
