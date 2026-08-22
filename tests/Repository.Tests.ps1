@@ -25,6 +25,20 @@ Describe 'Source-only repository policy' {
     }
 }
 
+Describe 'Portable Windows server launcher' {
+    BeforeAll {
+        $script:windowsLauncher = Get-Content -LiteralPath (Join-Path $script:repositoryRoot 'server/windows/Start-Server.ps1') -Raw
+    }
+
+    It 'does not treat an uninitialized native exit code as a configuration failure' {
+        $script:windowsLauncher | Should -Not -Match '(?s)Configure-PvPGN\.ps1.*?if\s*\(\$LASTEXITCODE\s*-ne\s*0\)'
+    }
+
+    It 'still returns the PvPGN process exit code' {
+        $script:windowsLauncher | Should -Match '(?s)bin/bnetd\.exe.*?exit\s+\$LASTEXITCODE'
+    }
+}
+
 Describe 'Hardened Compose deployment' {
     BeforeAll {
         $script:compose = Get-Content -LiteralPath (Join-Path $script:repositoryRoot 'server/docker/compose.yaml') -Raw
