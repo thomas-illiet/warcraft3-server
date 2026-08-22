@@ -49,11 +49,12 @@ foreach ($path in @($buildRoot, $packageRoot)) {
 New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
 
 $configureOutput = [System.Collections.Generic.List[string]]::new()
-& cmake -S $sourceRoot -B $buildRoot -A x64 `
+& cmake -S $sourceRoot -B $buildRoot -G 'Visual Studio 17 2022' -A x64 `
     "-DCMAKE_TOOLCHAIN_FILE=$toolchain" `
     '-DVCPKG_TARGET_TRIPLET=x64-windows-static' `
     "-DZLIB_INCLUDE_DIR=$zlibInclude" `
     "-DZLIB_LIBRARY=$zlibLibrary" `
+    '-DCMAKE_POLICY_VERSION_MINIMUM=3.5' `
     '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' `
     '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW' `
     '-DWITH_WIN32_GUI=OFF' '-DWITH_BNETD=ON' '-DWITH_D2CS=OFF' '-DWITH_D2DBS=OFF' `
