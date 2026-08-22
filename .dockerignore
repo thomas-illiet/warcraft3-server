@@ -1,0 +1,13 @@
+.git
+.github
+.tools
+artifacts
+build
+client
+config
+docker
+tools
+**/.idea
+**/.vscode
+**/*_test.go
+**/*.md

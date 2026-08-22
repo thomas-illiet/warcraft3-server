@@ -1,0 +1,43 @@
+# Local configuration
+.env
+**/.env
+!**/.env.example
+
+# Generated artifacts and build trees
+/artifacts/
+/build/
+/out/
+/.tmp/
+*.exe
+*.dll
+*.so
+*.dylib
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+SHA256SUMS.txt
+
+# Local toolchains and editor state
+/.tools/
+/.idea/
+/.vscode/
+**/.idea/
+**/.vscode/
+*.suo
+*.user
+
+# Obsolete local layout retained only as ignored workspace data
+/client/
+/config/
+/docker/
+/tools/
+/scripts/warcraft-gateways-*.clixml
+
+# Runtime data
+**/data/
+**/runtime/
+
+# OS metadata
+.DS_Store
+Thumbs.db

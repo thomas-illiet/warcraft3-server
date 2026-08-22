@@ -1,0 +1,6 @@
+[submodule "sources/pvpgn-server"]
+	path = sources/pvpgn-server
+	url = https://github.com/pvpgn/pvpgn-server.git
+[submodule "sources/w3l"]
+	path = sources/w3l
+	url = https://github.com/w3lh/w3l.git
