@@ -1,0 +1,30 @@
+name: warcraft3-server
+
+services:
+  pvpgn:
+    image: ghcr.io/thomas-illiet/warcraft3-server:latest
+    build:
+      context: ../..
+      dockerfile: server/docker/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    user: "10001:10001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "6112:6112/tcp"
+      - "6112:6112/udp"
+      - "6200:6200/tcp"
+    volumes:
+      - pvpgn-data:/var/lib/pvpgn
+    tmpfs:
+      - /run/pvpgn:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+volumes:
+  pvpgn-data:

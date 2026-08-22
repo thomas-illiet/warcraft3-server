@@ -60,6 +60,7 @@ mkdir -p "$runtime_dir/conf" "$data_dir/users" "$data_dir/clans" "$data_dir/team
     "$data_dir/ladders" "$data_dir/status"
 rm -rf "$runtime_dir/conf"/*
 cp -R "$config_source"/. "$runtime_dir/conf/"
+chmod -R u+w "$runtime_dir/conf"
 
 replace_setting servername "\"$SERVER_NAME\""
 replace_setting storage_path "\"file:mode=plain;dir=$data_dir/users;clan=$data_dir/clans;team=$data_dir/teams;default=$runtime_dir/conf/bnetd_default_user.plain\""
