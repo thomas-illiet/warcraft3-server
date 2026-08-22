@@ -1,0 +1,10 @@
+The Warcraft III server is exposed through the {{ include "warcraft3-server.fullname" . }} NodePort Service.
+
+Inspect the assigned node ports:
+  kubectl --namespace {{ .Release.Namespace }} get service {{ include "warcraft3-server.fullname" . }}
+
+Forward the public TCP and UDP port 6112 and public TCP port 6200 to the corresponding node ports.
+PUBLIC_IP must be the IPv4 address clients use to reach that forwarding rule.
+
+Check the server startup:
+  kubectl --namespace {{ .Release.Namespace }} logs deployment/{{ include "warcraft3-server.fullname" . }}

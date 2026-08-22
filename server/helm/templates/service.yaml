@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "warcraft3-server.fullname" . }}
+  labels:
+    {{- include "warcraft3-server.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  selector:
+    {{- include "warcraft3-server.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: game-tcp
+      port: {{ .Values.service.ports.gameTcp.port }}
+      targetPort: game-tcp
+      protocol: TCP
+      {{- with .Values.service.ports.gameTcp.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
+    - name: game-udp
+      port: {{ .Values.service.ports.gameUdp.port }}
+      targetPort: game-udp
+      protocol: UDP
+      {{- with .Values.service.ports.gameUdp.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
+    - name: route-tcp
+      port: {{ .Values.service.ports.routeTcp.port }}
+      targetPort: route-tcp
+      protocol: TCP
+      {{- with .Values.service.ports.routeTcp.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}

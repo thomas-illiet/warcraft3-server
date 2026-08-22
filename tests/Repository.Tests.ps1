@@ -46,3 +46,41 @@ Describe 'Hardened Compose deployment' {
         $script:compose | Should -Not -Match 'docker\.sock'
     }
 }
+
+Describe 'Hardened Helm deployment' {
+    BeforeAll {
+        $script:helmDeployment = Get-Content -LiteralPath (Join-Path $script:repositoryRoot 'server/helm/templates/deployment.yaml') -Raw
+        $script:helmService = Get-Content -LiteralPath (Join-Path $script:repositoryRoot 'server/helm/templates/service.yaml') -Raw
+        $script:helmValues = Get-Content -LiteralPath (Join-Path $script:repositoryRoot 'server/helm/values.yaml') -Raw
+    }
+
+    It 'exposes one NodePort service with all PvPGN transports' {
+        $script:helmService | Should -Match 'kind:\s*Service'
+        $script:helmValues | Should -Match 'type:\s*NodePort'
+        $script:helmService | Should -Match 'name:\s*game-tcp'
+        $script:helmService | Should -Match 'name:\s*game-udp'
+        $script:helmService | Should -Match 'name:\s*route-tcp'
+    }
+
+    It 'uses a numeric rootless identity and read-only root filesystem' {
+        $script:helmDeployment | Should -Match 'runAsNonRoot:\s*true'
+        $script:helmDeployment | Should -Match 'runAsUser:\s*10001'
+        $script:helmDeployment | Should -Match 'runAsGroup:\s*10001'
+        $script:helmDeployment | Should -Match 'readOnlyRootFilesystem:\s*true'
+    }
+
+    It 'drops capabilities and prevents privilege escalation' {
+        $script:helmDeployment | Should -Match 'allowPrivilegeEscalation:\s*false'
+        $script:helmDeployment | Should -Match 'drop:\s*\r?\n\s*- ALL'
+        $script:helmDeployment | Should -Match 'automountServiceAccountToken:\s*false'
+    }
+
+    It 'limits writes to data and an in-memory runtime directory' {
+        $script:helmDeployment | Should -Match 'mountPath:\s*/var/lib/pvpgn'
+        $script:helmDeployment | Should -Match 'mountPath:\s*/run/pvpgn'
+        $script:helmDeployment | Should -Match 'medium:\s*Memory'
+        $script:helmDeployment | Should -Not -Match 'hostPath:'
+        $script:helmDeployment | Should -Not -Match 'privileged:\s*true'
+        $script:helmDeployment | Should -Not -Match 'hostNetwork:\s*true'
+    }
+}

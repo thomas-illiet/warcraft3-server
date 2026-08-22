@@ -1,0 +1,50 @@
+image:
+  repository: ghcr.io/thomas-illiet/warcraft3-server
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+server:
+  name: Warcraft III Server
+  publicIp: 127.0.0.1
+  lanCidr: 192.168.0.0/16
+  localHostIp: 127.0.0.1
+  maxAccounts: 1000
+  timezone: UTC
+
+service:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  annotations: {}
+  ports:
+    gameTcp:
+      port: 6112
+      nodePort: null
+    gameUdp:
+      port: 6112
+      nodePort: null
+    routeTcp:
+      port: 6200
+      nodePort: null
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+  annotations: {}
+
+runtime:
+  sizeLimit: 16Mi
+
+podAnnotations: {}
+podLabels: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

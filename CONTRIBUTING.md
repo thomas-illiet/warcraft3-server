@@ -38,8 +38,12 @@ Invoke-ScriptAnalyzer -Path ./patch -Recurse -Settings ./PSScriptAnalyzerSetting
 ```
 
 ```sh
-shellcheck $(git ls-files '*.sh')
+mapfile -t shell_scripts < <(git ls-files '*.sh')
+shellcheck "${shell_scripts[@]}"
 docker compose --file server/docker/compose.yaml config
+helm lint server/helm --strict
+helm template ci server/helm --kube-version 1.25.0 \
+  --set-string server.publicIp=203.0.113.10 >/dev/null
 go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
 ```
 

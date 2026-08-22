@@ -77,6 +77,15 @@ jobs:
         shell: bash
         run: docker compose --file server/docker/compose.yaml config >/dev/null
 
+      - name: Validate Helm deployment
+        shell: bash
+        run: |
+          helm lint server/helm --strict
+          helm template ci server/helm \
+            --kube-version 1.25.0 \
+            --set-string image.tag=ci \
+            --set-string server.publicIp=203.0.113.10 >/dev/null
+
   patch:
     name: Windows x86 patch
     runs-on: ubuntu-24.04

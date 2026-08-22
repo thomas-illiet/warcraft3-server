@@ -1,0 +1,13 @@
+apiVersion: v2
+name: warcraft3-server
+description: Rootless, read-only PvPGN server for Warcraft III 1.28.5
+type: application
+version: 0.1.0
+appVersion: "latest"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/thomas-illiet/warcraft3-server
+sources:
+  - https://github.com/thomas-illiet/warcraft3-server
+maintainers:
+  - name: Thomas ILLIET
+    url: https://github.com/thomas-illiet

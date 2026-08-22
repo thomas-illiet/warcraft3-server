@@ -10,6 +10,7 @@ This repository builds a Warcraft III 1.28.5 client patch and a private PvPGN se
 | Windows server | `warcraft3-server-<version>-windows-x64.zip` | Portable console PvPGN server |
 | Linux server | `warcraft3-server-<version>-linux-x64.tar.gz` | Portable console PvPGN server |
 | Container | `ghcr.io/thomas-illiet/warcraft3-server:<version>` | Rootless, read-only deployment |
+| Helm chart | `server/helm/` | Rootless Kubernetes deployment with a NodePort Service |
 
 The server accepts Warcraft III and The Frozen Throne clients, validates version 1.28.5, listens on TCP/UDP 6112 and TCP 6200, applies LAN/public-address translation and leaves public PvPGN tracking disabled.
 
@@ -21,6 +22,7 @@ server/common/          Shared settings, version validation and configuration ge
 server/windows/         Windows runtime scripts
 server/linux/           Linux runtime and pinned build environment
 server/docker/          Rootless read-only image and Compose deployment
+server/helm/            Rootless Kubernetes chart and NodePort deployment
 sources/pvpgn-server/   Pinned PvPGN source submodule
 sources/w3l/            Pinned W3L source submodule
 scripts/                Source build and packaging entry points
@@ -37,6 +39,7 @@ Download the appropriate files from [GitHub Releases](https://github.com/thomas-
 - Read [patch/README.md](patch/README.md) before installing the client patch. It explains why W3L is required, what the compatibility patch changes and how realm registry synchronization works.
 - Read [server/windows/README.md](server/windows/README.md) or [server/linux/README.md](server/linux/README.md) for a portable native server.
 - Read [server/docker/README.md](server/docker/README.md) for the hardened container deployment.
+- Read [server/helm/README.md](server/helm/README.md) for the hardened Kubernetes deployment and NodePort routing requirements.
 
 All server formats use the same `.env` interface:
 
