@@ -179,7 +179,8 @@ jobs:
           try {
             ./scripts/Build-ServerWindows.ps1 -Archive -Version $env:VERSION -VcpkgRoot $vcpkgRoot
           } catch {
-            Write-Output "::error file=scripts/Build-ServerWindows.ps1::$($_.Exception.Message)"
+            $message = $_.Exception.Message.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Output "::error file=scripts/Build-ServerWindows.ps1::$message"
             throw
           }
 

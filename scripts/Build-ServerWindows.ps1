@@ -48,6 +48,7 @@ foreach ($path in @($buildRoot, $packageRoot)) {
 }
 New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
 
+$configureOutput = [System.Collections.Generic.List[string]]::new()
 & cmake -S $sourceRoot -B $buildRoot -A x64 `
     "-DCMAKE_TOOLCHAIN_FILE=$toolchain" `
     '-DVCPKG_TARGET_TRIPLET=x64-windows-static' `
@@ -56,8 +57,17 @@ New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
     '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' `
     '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW' `
     '-DWITH_WIN32_GUI=OFF' '-DWITH_BNETD=ON' '-DWITH_D2CS=OFF' '-DWITH_D2DBS=OFF' `
-    '-DWITH_LUA=OFF' '-DWITH_MYSQL=OFF' '-DWITH_SQLITE3=OFF' '-DWITH_PGSQL=OFF' '-DWITH_ODBC=OFF'
-if ($LASTEXITCODE -ne 0) { throw 'Could not configure the Windows server build.' }
+    '-DWITH_LUA=OFF' '-DWITH_MYSQL=OFF' '-DWITH_SQLITE3=OFF' '-DWITH_PGSQL=OFF' '-DWITH_ODBC=OFF' 2>&1 |
+    ForEach-Object {
+        $line = $_.ToString()
+        $configureOutput.Add($line)
+        Write-Output $line
+    }
+$configureExitCode = $LASTEXITCODE
+if ($configureExitCode -ne 0) {
+    $diagnostic = ($configureOutput | Select-Object -Last 25) -join [Environment]::NewLine
+    throw "Could not configure the Windows server build.$([Environment]::NewLine)$diagnostic"
+}
 & cmake --build $buildRoot --config Release --target bnetd --parallel
 if ($LASTEXITCODE -ne 0) { throw 'Could not build the Windows server.' }
 
