@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-package_root=${PACKAGE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
+package_root=${PACKAGE_ROOT:-$(unset CDPATH; cd -- "$(dirname -- "$0")/.." && pwd)}
 config_source=${CONFIG_SOURCE:-$package_root/config/base}
 runtime_dir=${RUNTIME_DIR:-$package_root/runtime}
 data_dir=${DATA_DIR:-$package_root/data}
@@ -31,8 +31,8 @@ replace_setting() {
     key=$1
     value=$2
     escaped=$(printf '%s' "$value" | sed 's/[\\&|]/\\&/g')
-    if grep -Eq "^[[:space:]]*$key[[:space:]]*=" "$runtime_dir/conf/bnetd.conf"; then
-        sed -i -E "s|^[[:space:]]*$key[[:space:]]*=.*|$key = $escaped|" "$runtime_dir/conf/bnetd.conf"
+    if grep -Eq "^[[:space:]]*${key}[[:space:]]*=" "$runtime_dir/conf/bnetd.conf"; then
+        sed -i -E "s|^[[:space:]]*${key}[[:space:]]*=.*|$key = $escaped|" "$runtime_dir/conf/bnetd.conf"
     else
         printf '%s = %s\n' "$key" "$value" >> "$runtime_dir/conf/bnetd.conf"
     fi

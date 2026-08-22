@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /patch/build
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /server/linux/build
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /server/docker
+    schedule:
+      interval: weekly

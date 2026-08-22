@@ -7,7 +7,8 @@ Describe 'Source-only repository policy' {
         $tracked = & git -C $script:repositoryRoot ls-files
         $forbidden = @($tracked | Where-Object {
             $_ -match '(?i)\.(exe|dll|zip|7z|tar|gz|msi|pdb|so|a|lib)$' -or
-            $_ -match '^(artifacts|build|dist|out)/'
+            $_ -match '^(artifacts|build|dist|out)/' -or
+            $_ -match '(^|/)SHA256SUMS\.txt$'
         })
         $forbidden -join "`n" | Should -BeNullOrEmpty
     }

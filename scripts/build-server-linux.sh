@@ -4,7 +4,7 @@ set -eu
 version=${1:-dev}
 case "$version" in ''|*[!0-9A-Za-z.-]*) printf 'Invalid version: %s\n' "$version" >&2; exit 2 ;; esac
 
-repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+repository_root=$(unset CDPATH; cd -- "$(dirname -- "$0")/.." && pwd)
 artifact_root=$repository_root/artifacts/server/linux
 package_root=$artifact_root/warcraft3-server
 archive_path=$artifact_root/warcraft3-server-$version-linux-x64.tar.gz

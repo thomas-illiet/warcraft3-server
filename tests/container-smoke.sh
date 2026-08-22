@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+repository_root=$(unset CDPATH; cd -- "$(dirname -- "$0")/.." && pwd)
 suffix=$$
 image=warcraft3-server:smoke-$suffix
 container=warcraft3-server-smoke-$suffix
@@ -32,6 +32,8 @@ done
 
 [ "$(docker inspect --format '{{.Config.User}}' "$container")" = '10001:10001' ]
 [ "$(docker inspect --format '{{.HostConfig.ReadonlyRootfs}}' "$container")" = 'true' ]
+[ "$(docker inspect --format '{{json .HostConfig.CapDrop}}' "$container")" = '["ALL"]' ]
+docker inspect --format '{{json .HostConfig.SecurityOpt}}' "$container" | grep -q 'no-new-privileges'
 [ "$(docker exec "$container" sh -c 'printf "%s:%s" "$(id -u)" "$(id -g)"')" = '10001:10001' ]
 docker exec "$container" touch /rootfs-write-test >/dev/null 2>&1 && exit 1
 docker exec "$container" sh -c 'printf persistent > /var/lib/pvpgn/smoke-marker'

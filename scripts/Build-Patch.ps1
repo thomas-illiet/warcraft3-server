@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$OutputDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) 'artifacts\patch'),
+    [string]$OutputDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) 'artifacts/patch'),
     [string]$Version = 'dev',
     [switch]$NoCache,
     [switch]$Archive
@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 
 $projectDirectory = Split-Path $PSScriptRoot -Parent
 $resolvedOutput = [System.IO.Path]::GetFullPath($OutputDirectory)
-$dockerfile = Join-Path $projectDirectory 'patch\build\Dockerfile'
+$dockerfile = Join-Path $projectDirectory 'patch/build/Dockerfile'
 $exportDirectory = Join-Path $resolvedOutput 'warcraft3-patch'
 
 if (Test-Path -LiteralPath $exportDirectory) {
@@ -33,9 +33,9 @@ if ($LASTEXITCODE -ne 0) {
     throw 'The W3L Docker build failed.'
 }
 
-Copy-Item -LiteralPath (Join-Path $projectDirectory 'patch\Manage-WarcraftRealms.ps1') -Destination $exportDirectory
-Copy-Item -LiteralPath (Join-Path $projectDirectory 'patch\README.md') -Destination $exportDirectory
-Copy-Item -LiteralPath (Join-Path $projectDirectory 'sources\w3l\LICENSE') -Destination (Join-Path $exportDirectory 'LICENSE-W3L')
+Copy-Item -LiteralPath (Join-Path $projectDirectory 'patch/Manage-WarcraftRealms.ps1') -Destination $exportDirectory
+Copy-Item -LiteralPath (Join-Path $projectDirectory 'patch/README.md') -Destination $exportDirectory
+Copy-Item -LiteralPath (Join-Path $projectDirectory 'sources/w3l/LICENSE') -Destination (Join-Path $exportDirectory 'LICENSE-W3L')
 
 $requiredFiles = 'w3l.exe', 'w3lh.dll', 'wl27.dll', 'Manage-WarcraftRealms.ps1', 'README.md', 'LICENSE-W3L'
 foreach ($requiredFile in $requiredFiles) {

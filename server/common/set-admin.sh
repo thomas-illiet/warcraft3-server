@@ -7,7 +7,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 case "$1" in ''|*[!A-Za-z0-9_\[\]-]*) printf 'Invalid account name.\n' >&2; exit 2 ;; esac
-data_dir=${DATA_DIR:-$(CDPATH= cd -- "$(dirname -- "$0")/../data" && pwd)}
+data_dir=${DATA_DIR:-$(unset CDPATH; cd -- "$(dirname -- "$0")/../data" && pwd)}
 account_file=$data_dir/users/$1
 [ -f "$account_file" ] || { printf 'Account not found: %s\n' "$1" >&2; exit 1; }
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+repository_root=$(unset CDPATH; cd -- "$(dirname -- "$0")/.." && pwd)
 package_root=$repository_root/artifacts/server/linux/warcraft3-server
 container=warcraft3-linux-smoke-$$
 
