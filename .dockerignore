@@ -10,4 +10,3 @@ tools
 **/.idea
 **/.vscode
 **/*_test.go
-**/*.md

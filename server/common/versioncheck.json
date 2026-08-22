@@ -1,0 +1,19 @@
+{
+  "W3XP": {
+    "IX86": {
+      "0x1c": {
+        "checkRevisionFile": "ver-IX86-1.mpq",
+        "equation": "A=1239576727 C=1604096186 B=4198521212 4 A=A+S B=B-C C=C^A A=A+B",
+        "entries": [
+          {
+            "title": "Warcraft III - The Frozen Throne 1.28.5",
+            "version": "1.28.5.0",
+            "hash": "0x60743fc9",
+            "fileMetadata": "Warcraft III.exe 07/07/17 20:15:59 562152",
+            "versionTag": "W3XP_1285"
+          }
+        ]
+      }
+    }
+  }
+}
