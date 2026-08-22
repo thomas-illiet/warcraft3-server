@@ -78,7 +78,16 @@ The Windows server requires Windows, Visual Studio 2022, CMake and vcpkg:
 ./scripts/Build-ServerWindows.ps1 -Archive -Version dev
 ```
 
-The GitHub workflow runs these builds independently. A semantic `vMAJOR.MINOR.PATCH` tag publishes all three archives, checksums, the GitHub release and the GHCR image. Stable tags also update `latest`; prerelease tags do not.
+GitHub Actions is not limited to Linux. The workflow deliberately assigns each build to the runner that matches its toolchain:
+
+| Job | GitHub runner | Entry point |
+| --- | --- | --- |
+| W3L patch | Ubuntu | PowerShell wrapper around the pinned Docker cross-compiler |
+| Linux server | Ubuntu | `scripts/build-server-linux.sh` |
+| Windows server | Windows Server 2025 | `scripts/Build-ServerWindows.ps1` and Visual Studio 2022 |
+| Container | Ubuntu | Docker Buildx |
+
+PowerShell is therefore used for Windows-specific registry, launch, administration and Visual Studio build tasks. Linux runtime and server build tasks do not depend on PowerShell. A semantic `vMAJOR.MINOR.PATCH` tag publishes all three archives, checksums, the GitHub release and the GHCR image. Stable tags also update `latest`; prerelease tags do not.
 
 ## Licensing and security
 

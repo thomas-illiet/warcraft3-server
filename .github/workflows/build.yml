@@ -66,7 +66,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          shellcheck $(git ls-files '*.sh')
+          mapfile -t shell_scripts < <(git ls-files '*.sh')
+          shellcheck "${shell_scripts[@]}"
 
       - name: Validate workflow syntax
         shell: bash
@@ -175,7 +176,12 @@ jobs:
         run: |
           $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
           if (-not $vcpkgRoot) { $vcpkgRoot = 'C:\vcpkg' }
-          ./scripts/Build-ServerWindows.ps1 -Archive -Version $env:VERSION -VcpkgRoot $vcpkgRoot
+          try {
+            ./scripts/Build-ServerWindows.ps1 -Archive -Version $env:VERSION -VcpkgRoot $vcpkgRoot
+          } catch {
+            Write-Output "::error file=scripts/Build-ServerWindows.ps1::$($_.Exception.Message)"
+            throw
+          }
 
       - name: Verify PE architecture
         shell: pwsh

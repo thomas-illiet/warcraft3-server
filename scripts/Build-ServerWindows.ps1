@@ -15,7 +15,6 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $sourceRoot = Join-Path $repositoryRoot 'sources/pvpgn-server'
 $buildRoot = Join-Path $repositoryRoot 'build/windows-pvpgn'
-$installRoot = Join-Path $repositoryRoot 'build/windows-install'
 $artifactRoot = Join-Path $repositoryRoot 'artifacts/server/windows'
 $packageRoot = Join-Path $artifactRoot 'warcraft3-server'
 
@@ -25,11 +24,13 @@ foreach ($command in @('cmake', 'git')) {
 if (-not $VcpkgRoot) { throw 'VcpkgRoot or VCPKG_INSTALLATION_ROOT is required.' }
 $toolchain = Join-Path $VcpkgRoot 'scripts/buildsystems/vcpkg.cmake'
 if (-not (Test-Path -LiteralPath $toolchain)) { throw "Vcpkg toolchain not found: $toolchain" }
+$vcpkg = Join-Path $VcpkgRoot 'vcpkg.exe'
+if (-not (Test-Path -LiteralPath $vcpkg)) { throw "vcpkg executable not found: $vcpkg" }
 
-& (Join-Path $VcpkgRoot 'vcpkg.exe') install zlib:x64-windows-static
+& $vcpkg install zlib:x64-windows-static
 if ($LASTEXITCODE -ne 0) { throw 'Could not install static zlib with vcpkg.' }
 
-foreach ($path in @($buildRoot, $installRoot, $packageRoot)) {
+foreach ($path in @($buildRoot, $packageRoot)) {
     if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Recurse -Force }
 }
 New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
@@ -42,17 +43,42 @@ New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
     '-DWITH_WIN32_GUI=OFF' '-DWITH_BNETD=ON' '-DWITH_D2CS=OFF' '-DWITH_D2DBS=OFF' `
     '-DWITH_LUA=OFF' '-DWITH_MYSQL=OFF' '-DWITH_SQLITE3=OFF' '-DWITH_PGSQL=OFF' '-DWITH_ODBC=OFF'
 if ($LASTEXITCODE -ne 0) { throw 'Could not configure the Windows server build.' }
-& cmake --build $buildRoot --config Release --parallel
+& cmake --build $buildRoot --config Release --target bnetd --parallel
 if ($LASTEXITCODE -ne 0) { throw 'Could not build the Windows server.' }
-& cmake --install $buildRoot --config Release --prefix $installRoot
-if ($LASTEXITCODE -ne 0) { throw 'Could not install the Windows server staging tree.' }
+
+$serverBinary = Get-ChildItem -LiteralPath $buildRoot -Filter 'bnetd.exe' -File -Recurse |
+    Where-Object { $_.FullName -match '[\\/]Release[\\/]bnetd\.exe$' } |
+    Select-Object -First 1
+if (-not $serverBinary) { throw 'The Windows build did not produce a Release bnetd.exe.' }
 
 foreach ($directory in @('bin', 'config/base', 'files', 'data', 'scripts')) {
     New-Item -ItemType Directory -Path (Join-Path $packageRoot $directory) -Force | Out-Null
 }
-Copy-Item -LiteralPath (Join-Path $installRoot 'bnetd.exe') -Destination (Join-Path $packageRoot 'bin/bnetd.exe')
-Copy-Item -Path (Join-Path $installRoot 'conf/*') -Destination (Join-Path $packageRoot 'config/base') -Recurse -Force
-Copy-Item -Path (Join-Path $installRoot 'var/files/*') -Destination (Join-Path $packageRoot 'files') -Recurse -Force
+Copy-Item -LiteralPath $serverBinary.FullName -Destination (Join-Path $packageRoot 'bin/bnetd.exe')
+Copy-Item -Path (Join-Path $buildRoot 'conf/*') -Destination (Join-Path $packageRoot 'config/base') -Recurse -Force
+
+$runtimeFiles = @(
+    'ad000001.png',
+    'ad000001.smk',
+    'ad000002.mng',
+    'ad000002.smk',
+    'bnserver-D2DV.ini',
+    'bnserver-D2XP.ini',
+    'bnserver-WAR3.ini',
+    'bnserver.ini',
+    'icons_STAR.bni',
+    'icons-WAR3.bni',
+    'icons.bni',
+    'IX86ExtraWork.mpq',
+    'IX86ver1.mpq',
+    'newbie.save',
+    'PMACver1.mpq',
+    'ver-IX86-1.mpq',
+    'XMACver1.mpq'
+)
+foreach ($runtimeFile in $runtimeFiles) {
+    Copy-Item -LiteralPath (Join-Path $sourceRoot "files/$runtimeFile") -Destination (Join-Path $packageRoot 'files')
+}
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'server/common/versioncheck.json') -Destination (Join-Path $packageRoot 'config/base/versioncheck.json') -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'server/common/.env.example') -Destination (Join-Path $packageRoot '.env.example')
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'server/windows/Start-Server.ps1') -Destination $packageRoot
