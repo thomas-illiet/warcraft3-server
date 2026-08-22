@@ -30,6 +30,19 @@ if (-not (Test-Path -LiteralPath $vcpkg)) { throw "vcpkg executable not found: $
 & $vcpkg install zlib:x64-windows-static
 if ($LASTEXITCODE -ne 0) { throw 'Could not install static zlib with vcpkg.' }
 
+$vcpkgInstalled = Join-Path $VcpkgRoot 'installed/x64-windows-static'
+$zlibInclude = Join-Path $vcpkgInstalled 'include'
+# PvPGN's legacy finder predates the current static `zs.lib` name used by vcpkg.
+$zlibCandidates = @('zs.lib', 'zlib.lib', 'zlibstatic.lib', 'z.lib') |
+    ForEach-Object { Join-Path $vcpkgInstalled "lib/$_" }
+$zlibLibrary = $zlibCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if (-not (Test-Path -LiteralPath (Join-Path $zlibInclude 'zlib.h'))) {
+    throw "Static zlib headers were not installed under: $zlibInclude"
+}
+if (-not $zlibLibrary) {
+    throw "Static zlib library was not found under: $(Join-Path $vcpkgInstalled 'lib')"
+}
+
 foreach ($path in @($buildRoot, $packageRoot)) {
     if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Recurse -Force }
 }
@@ -38,6 +51,8 @@ New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
 & cmake -S $sourceRoot -B $buildRoot -A x64 `
     "-DCMAKE_TOOLCHAIN_FILE=$toolchain" `
     '-DVCPKG_TARGET_TRIPLET=x64-windows-static' `
+    "-DZLIB_INCLUDE_DIR=$zlibInclude" `
+    "-DZLIB_LIBRARY=$zlibLibrary" `
     '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' `
     '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW' `
     '-DWITH_WIN32_GUI=OFF' '-DWITH_BNETD=ON' '-DWITH_D2CS=OFF' '-DWITH_D2DBS=OFF' `
